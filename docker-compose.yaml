@@ -1,0 +1,74 @@
+version: "3.8"
+
+services:
+  app:
+    build: 
+      context: ./db-app
+      dockerfile: db.Dockerfile
+    container_name: app
+    volumes:
+      - 'app_data:/var/www/db-app'
+    ports:
+      - "3000:3000"
+    networks:
+      - my_network
+
+  client-app:
+    build: 
+      context: ./client-app
+      dockerfile: client.Dockerfile
+    container_name: client-app
+    volumes:
+      - 'client_data:/var/www/client-app'
+    ports:
+      - "3001:3001"
+    networks:
+      - my_network
+
+  provider-app:
+    build: 
+      context: ./provider-app
+      dockerfile: provider.Dockerfile
+    container_name: provider-app
+    volumes:
+      - 'provider_data:/var/www/provider-app'
+    ports:
+      - "3002:3002"
+    networks:
+      - my_network
+
+  db:
+    image: postgres:latest
+    container_name: postgres_db
+    environment:
+      - POSTGRES_USER=user 
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=app
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - my_network
+
+  rabbitmq:
+    image: rabbitmq:latest
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - my_network
+
+volumes:
+  db_data:
+  rabbitmq_data:
+  app_data:
+  client_data:
+  provider_data:
+  
+networks:
+  my_network:
+    driver: bridge
